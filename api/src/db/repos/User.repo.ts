@@ -6,6 +6,8 @@ import executeOrFail from "~/util/executeOrFail";
 import OauthConnection from "../entity/OauthConnection.entity";
 import UserProfile from "../entity/UserProfile.entity";
 
+// standard imports
+
 @EntityRepository(User)
 class UserRepository extends Repository<User> {
   async createDiscordUser(oauthUser: DiscordUser): Promise<User> {
@@ -18,12 +20,17 @@ class UserRepository extends Repository<User> {
         isPrimary: true,
       }).save();
 
+      // email and discord auth service  
+      
       const profile = await UserProfile.create({
         avatarUrl: `https://cdn.discordapp.com/avatars/${process.env.DISCORD_OAUTH_CLIENT_ID}/${oauthUser.avatar}.webp`,
         bio: "",
         connections: [connection],
       }).save();
-
+       
+      // profile service 
+      // fetched from a valid discord content delivery network
+      
       const user = await User.create({
         email: oauthUser.email || "",
         joinDate: new Date(),
@@ -35,6 +42,8 @@ class UserRepository extends Repository<User> {
         followedProjects: [],
       }).save();
 
+      // user creation service [ github, discord, local(email) ]
+      
       await OauthConnection.update(connection, {
         owner: user,
       });
